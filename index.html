@@ -1,51 +1,102 @@
 <!DOCTYPE html>
-<html lang="ht" class="dark">
+<html lang="ht">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TF-Domain</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script>
-    async function registerDomain() {
-      const input = document.getElementById('domain-input');
-      const name = input.value.trim().toLowerCase();
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0f0f0f;
+      color: white;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #00ffcc;
+    }
+    form {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ffcc44;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    input, textarea {
+      background: #2a2a2a;
+      color: white;
+    }
+    button {
+      background: #00ffcc;
+      color: black;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
 
-      if (!name) {
-        alert('Antre yon non domèn.');
-        return;
-      }
+  <h1>🌐 TF-Domain<br><small>Domain--> .TF</small></h1>
+
+  <form id="form">
+    <input name="name" placeholder="Antre non domèn (ex: lavie)" required />
+    <textarea name="code" placeholder=".html  (ex: <h1>Hello TF</h1>)" rows="8" required></textarea>
+    <button type="submit">TF-Domain</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('form');
+    const result = document.getElementById('result');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const name = form.name.value.trim();
+      const code = form.code.value;
+
+      if (!name || !code) return;
+
+      result.innerHTML = "...";
 
       try {
-        const res = await fetch(`/api/register?name=${name}`);
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, code })
+        });
+
         const data = await res.json();
 
         if (data.success) {
-          document.getElementById('result').innerHTML =
-            `<div class='mt-4 text-green-400'>
-              ✅ Domèn ou an: <a href="https://${name}.tf.tf" class="underline">${name}.tf.tf</a>
-            </div>`;
+          result.innerHTML = `✅ TF-Domain: <br><a href="${data.url}" target="_blank">${data.domain}</a>`;
         } else {
-          document.getElementById('result').innerHTML =
-            `<div class='mt-4 text-red-400'>❌ Erè: ${data.message}</div>`;
+          result.innerHTML = `❌ Erè: ${data.error}`;
         }
       } catch (err) {
-        document.getElementById('result').innerHTML =
-          `<div class='mt-4 text-red-400'>❌ Erè rezo: ${err.message}</div>`;
+        result.innerHTML = `❌ Erè rezo`;
+        console.error(err);
       }
-    }
+    };
   </script>
-</head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center px-4">
-  <h1 class="text-4xl font-bold mb-4">🌐 TF-Domain</h1>
-  <p class="text-gray-400 mb-6 text-center">Kreye domèn gratis ki fini pa <strong>.TF</strong></p>
-  <div class="w-full max-w-md">
-    <input id="domain-input" type="text" placeholder="ex: monbiznis"
-      class="w-full px-4 py-3 text-black rounded-xl" />
-    <button onclick="registerDomain()"
-      class="w-full mt-4 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-200">
-      Rezève Domèn TF
-    </button>
-    <div id="result" class="mt-4"></div>
-  </div>
+
 </body>
-  </html>
+</html>
