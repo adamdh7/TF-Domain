@@ -1,46 +1,43 @@
-// api/register.js
+import fs from 'fs/promises';
 
-import fs from 'fs';
-import path from 'path';
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Non' });
-  }
-
+export async function POST(req) {
   try {
-    let body = '';
+    const body = await req.json();
+    const { domain, code } = body;
 
-    // Resevwa done an
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-
-    req.on('end', () => {
-      const { name, code } = JSON.parse(body);
-
-      if (!name || !code) {
-        return res.status(400).json({ error: 'Ex--TF-Stream.' });
-      }
-
-      const safeName = name.toLowerCase().replace(/[^a-z0-9-_]/g, '');
-      const filename = `${safeName}.html`;
-      const filePath = path.join(process.cwd(), 'public', 'domains', filename);
-
-      // Kreye folder si li pa egziste
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-
-      // Sove kòd la
-      fs.writeFileSync(filePath, code, 'utf8');
-
-      return res.status(200).json({
-        success: true,
-        domain: `${safeName}.tf`,
-        url: `https://tf-domain.vercel.app/domains/${filename}`
+    if (!domain || !code) {
+      return new Response(JSON.stringify({ error: 'Domain or code missing' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    const safeDomain = domain.replace(/[^a-zA-Z0-9_-]/g, '');
+    const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${safeDomain}.tf</title>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+
+    const filePath = `./domain/${safeDomain}.html`;
+    await fs.writeFile(filePath, fullHtml);
+
+    return new Response(JSON.stringify({ success: true, url: `/domain/${safeDomain}.html` }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Erè sèvè.' });
+    console.error('❌ API Error:', err);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-        }
+}
