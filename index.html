@@ -5,97 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TF-Domain</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #0f0f0f;
-      color: white;
-      margin: 0;
-      padding: 2rem;
-    }
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      color: #00ffcc;
-    }
-    form {
-      max-width: 600px;
-      margin: 2rem auto;
-      background: #1a1a1a;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00ffcc44;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin-top: 1rem;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-    input, textarea {
-      background: #2a2a2a;
-      color: white;
-    }
-    button {
-      background: #00ffcc;
-      color: black;
-      cursor: pointer;
-    }
-    #result {
-      margin-top: 1rem;
-      text-align: center;
-    }
-    a {
-      color: #00ffcc;
-      text-decoration: none;
-    }
+    body { background: #0f0f0f; color: #fff; font-family: sans-serif; padding: 2rem; }
+    form { max-width: 600px; margin: auto; background: #1a1a1a; padding: 2rem; border-radius: 8px; }
+    input, textarea, button { width: 100%; margin-top: 1rem; padding: .75rem; border: none; border-radius: 6px; font-size: 1rem; }
+    input, textarea { background: #2a2a2a; color: #fff; }
+    button { background: #00ffcc; color: #000; cursor: pointer; }
+    #result { margin-top: 1rem; text-align: center; }
+    a { color: #00ffcc; }
   </style>
 </head>
 <body>
 
-  <h1>🌐 TF-Domain<br><small>Domain--> .TF</small></h1>
+  <h1 style="text-align:center; color:#00ffcc;">🌐 TF-Domain<br><small style="color:#888;">Domain –> .TF</small></h1>
 
-  <form id="form">
-    <input name="name" placeholder="Antre non domèn (ex: lavie)" required />
-    <textarea name="code" placeholder=".html  (ex: <h1>Hello TF</h1>)" rows="8" required></textarea>
-    <button type="submit">TF-Domain</button>
+  <form id="tfForm">
+    <!-- ATTENTION : name="domain" -->
+    <input id="domain" name="domain" type="text" placeholder="Non domèn (ex: lavie)" required />
+
+    <!-- ATTENTION : name="code" -->
+    <textarea id="code" name="code" rows="8" placeholder="Antre kòd HTML ou la..." required></textarea>
+
+    <button type="submit">🚀 TF-Domain</button>
   </form>
 
   <div id="result"></div>
 
   <script>
-    const form = document.getElementById('form');
-    const result = document.getElementById('result');
-
-    form.onsubmit = async (e) => {
+    document.getElementById('tfForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const name = form.name.value.trim();
-      const code = form.code.value;
 
-      if (!name || !code) return;
+      const domain = document.getElementById('domain').value.trim();
+      const code   = document.getElementById('code').value.trim();
+      const result = document.getElementById('result');
 
-      result.innerHTML = "...";
+      if (!domain || !code) {
+        result.innerHTML = '<span style="color:#f55;">❌ Erè: Domain or code missing</span>';
+        return;
+      }
+
+      result.textContent = '⏳ Ap kreye domèn ou...';
 
       try {
-        const res = await fetch('/api/register', {
-          method: 'POST',
+        const res  = await fetch('/api/register', {
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, code })
+          body:    JSON.stringify({ domain, code })
         });
-
         const data = await res.json();
 
         if (data.success) {
-          result.innerHTML = `✅ TF-Domain: <br><a href="${data.url}" target="_blank">${data.domain}</a>`;
+          result.innerHTML = `✅ Domèn kreye: <a href="${data.url}" target="_blank">${data.domain}</a>`;
         } else {
-          result.innerHTML = `❌ Erè: ${data.error}`;
+          result.innerHTML = `<span style="color:#f55;">❌ Erè: ${data.error || data.message}</span>`;
         }
       } catch (err) {
-        result.innerHTML = `❌ Erè rezo`;
+        result.innerHTML = '<span style="color:#f55;">❌ Erè rezo</span>';
         console.error(err);
       }
-    };
+    });
   </script>
 
 </body>
