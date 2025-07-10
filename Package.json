@@ -1,0 +1,12 @@
+{
+  "name": "tf-domain",
+  "version": "1.0.0",
+  "description": "TF-Domain - Kreye subdomain .tf",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "keywords": [],
+  "license": "MIT"
+}
