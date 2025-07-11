@@ -1,43 +1,51 @@
-import fs from 'fs/promises';
+// api/register.js
+import fs from 'fs';
+import path from 'path';
 
-export async function POST(req) {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+  }
+
+  const { domain, code } = req.body || {};
+  if (!domain || !code) {
+    return res.status(400).json({ success: false, error: 'Domain or code missing' });
+  }
+
   try {
-    const body = await req.json();
-    const { domain, code } = body;
+    // Nettoyage du nom
+    const safe = domain.toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    const filename = `${safe}.html`;
 
-    if (!domain || !code) {
-      return new Response(JSON.stringify({ error: 'Domain or code missing' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const safeDomain = domain.replace(/[^a-zA-Z0-9_-]/g, '');
+    // Génération du HTML complet
     const fullHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="ht">
 <head>
   <meta charset="UTF-8">
-  <title>${safeDomain}.tf</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${safe}.tf</title>
 </head>
 <body>
 ${code}
 </body>
 </html>`;
 
-    const filePath = `./domain/${safeDomain}.html`;
-    await fs.writeFile(filePath, fullHtml);
+    // Chemin vers public/domain
+    const dir = path.join(process.cwd(), 'public', 'domain');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    return new Response(JSON.stringify({ success: true, url: `/domain/${safeDomain}.html` }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    // Écriture du fichier
+    const filePath = path.join(dir, filename);
+    fs.writeFileSync(filePath, fullHtml, 'utf8');
+
+    return res.status(200).json({
+      success: true,
+      domain: `${safe}.tf`,
+      url: `/domain/${filename}`
     });
-
   } catch (err) {
-    console.error('❌ API Error:', err);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error(err);
+    return res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
