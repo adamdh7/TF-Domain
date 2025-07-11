@@ -1,15 +1,16 @@
-// api/register.js
+// server.js
+const express = require("express");
+const path = require("path");
+const app = express();
 
-export default async function handler(req, res) {
-  const name = req.query.name?.toLowerCase().replace(/[^a-z0-9-]/g, '');
+app.use(express.static("public"));
 
-  if (!name || name.length < 3 || name.length > 32) {
-    return res.status(400).json({
-      success: false,
-      message: ' (Max 3-32 Ex--> Tergene).'
-    });
-  }
+// Serve view.js statically or render an HTML file
+app.get("/view", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages/view.html"));
+  // oswa si view.js ap fè logic, ou ka reponn ak JSON
+});
 
-  // Similasyon ke domèn lan disponib
-  return res.status(200).json({ success: true });
-}
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
