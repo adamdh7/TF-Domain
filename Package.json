@@ -1,12 +1,15 @@
 {
   "name": "tf-domain",
   "version": "1.0.0",
-  "description": "TF-Domain - Kreye subdomain .tf",
-  "type": "module",
+  "description": "TF-Domain - Adam_D'H7",
+  "main": "server.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "license": "MIT"
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
