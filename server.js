@@ -1,16 +1,25 @@
 // server.js
-const express = require("express");
-const path = require("path");
+const path = require('path');
+const express = require('express');
 const app = express();
 
-app.use(express.static("public"));
+const PORT = process.env.PORT || 3000;
 
-// Serve view.js statically or render an HTML file
-app.get("/view", (req, res) => {
-  res.sendFile(path.join(__dirname, "pages/view.html"));
-  // oswa si view.js ap fè logic, ou ka reponn ak JSON
+// sert fichye statik (index.html doit être à la racine ou dans /public)
+app.use(express.static(path.join(__dirname)));
+
+// middleware simple pour renvoyer index.html pour les requêtes GET HTML
+app.use((req, res, next) => {
+  if (req.method === 'GET' && req.accepts('html')) {
+    const indexPath = path.join(__dirname, 'index.html');
+    return res.sendFile(indexPath, err => {
+      if (err) next(err);
+    });
+  }
+  next();
 });
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
-});
+// fallback 404 pour les autres requêtes
+app.use((req, res) => res.status(404).send('Not found'));
+
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
